@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Мои Финансы</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:system-ui;
+background:#f5f6fa;
+font-size:18px;
+}
+
+header{
+background:linear-gradient(90deg,#6366f1,#8b5cf6);
+color:white;
+padding:22px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+}
+
+nav{
+display:flex;
+justify-content:space-around;
+background:white;
+padding:14px;
+box-shadow:0 3px 8px rgba(0,0,0,0.08);
+position:sticky;
+top:0;
+}
+
+nav button{
+background:none;
+border:none;
+font-size:18px;
+cursor:pointer;
+padding:10px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:16px;
+margin-bottom:20px;
+box-shadow:0 4px 15px rgba(0,0,0,0.05);
+}
+
+h2{
+margin-top:0;
+}
+
+input{
+width:100%;
+padding:14px;
+margin-top:10px;
+margin-bottom:15px;
+font-size:17px;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+.mainBtn{
+width:100%;
+padding:15px;
+background:#6366f1;
+color:white;
+border:none;
+border-radius:10px;
+font-size:18px;
+cursor:pointer;
+}
+
+.history-item{
+display:flex;
+justify-content:space-between;
+padding:12px 0;
+border-bottom:1px solid #eee;
+align-items:center;
+}
+
+.actions button{
+border:none;
+padding:6px 10px;
+margin-left:6px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.edit{
+background:#f59e0b;
+color:white;
+}
+
+.delete{
+background:#ef4444;
+color:white;
+}
+
+canvas{
+max-width:360px;
+margin:auto;
+display:block;
+}
+
+.hidden{
+display:none;
+}
+
+#toast{
+position:fixed;
+bottom:25px;
+left:50%;
+transform:translateX(-50%);
+background:#22c55e;
+color:white;
+padding:14px 24px;
+border-radius:10px;
+font-size:18px;
+opacity:0;
+transition:0.3s;
+}
+
+.monthItem{
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>💰 Мои Финансы</header>
+
+<nav>
+<button onclick="openTab('add')">➕ Добавить</button>
+<button onclick="openTab('history')">📜 История</button>
+<button onclick="openTab('stats')">📊 Статистика</button>
+<button onclick="openTab('months')">📅 Месяцы</button>
+</nav>
+
+<div class="container">
+
+<!-- ДОБАВИТЬ -->
+
+<div id="add">
+
+<div class="card">
+
+<h2>Добавить расход</h2>
+
+<input id="amount" type="number" placeholder="Сумма">
+
+<input id="category" placeholder="Категория (еда, транспорт)">
+
+<button class="mainBtn" onclick="addExpense()">Добавить расход</button>
+
+</div>
+
+</div>
+
+<!-- ИСТОРИЯ -->
+
+<div id="history" class="hidden">
+
+<div class="card">
+
+<h2>История расходов</h2>
+
+<div id="historyList"></div>
+
+</div>
+
+</div>
+
+<!-- СТАТИСТИКА -->
+
+<div id="stats" class="hidden">
+
+<div class="card">
+
+<h2>Диаграмма расходов</h2>
+
+<canvas id="chart"></canvas>
+
+</div>
+
+</div>
+
+<!-- МЕСЯЦЫ -->
+
+<div id="months" class="hidden">
+
+<div class="card">
+
+<h2>Расходы по месяцам</h2>
+
+<div id="monthStats"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+let expenses = JSON.parse(localStorage.getItem("expenses")) || []
+let chart = null
+
+function save(){
+localStorage.setItem("expenses",JSON.stringify(expenses))
+}
+
+function showToast(text){
+
+let t=document.getElementById("toast")
+
+t.innerText=text
+t.style.opacity=1
+
+setTimeout(()=>{
+t.style.opacity=0
+},2500)
+
+}
+
+function openTab(tab){
+
+document.querySelectorAll(".container > div")
+.forEach(e=>e.classList.add("hidden"))
+
+document.getElementById(tab).classList.remove("hidden")
+
+if(tab==="history") renderHistory()
+if(tab==="stats") drawChart()
+if(tab==="months") renderMonths()
+
+}
+
+function addExpense(){
+
+let amount=Number(document.getElementById("amount").value)
+let category=document.getElementById("category").value.toLowerCase().trim()
+
+if(!amount || !category){
+showToast("Введите данные")
+return
+}
+
+let date=new Date()
+
+expenses.push({
+amount,
+category,
+date:date.toISOString()
+})
+
+save()
+
+document.getElementById("amount").value=""
+document.getElementById("category").value=""
+
+showToast("Расход добавлен")
+
+renderHistory()
+
+}
+
+function renderHistory(){
+
+let list=document.getElementById("historyList")
+
+list.innerHTML=""
+
+expenses.forEach((e,i)=>{
+
+let div=document.createElement("div")
+
+div.className="history-item"
+
+div.innerHTML=`
+<div>
+<b>${e.category}</b><br>
+${e.amount} ₽
+</div>
+
+<div class="actions">
+<button class="edit" onclick="editExpense(${i})">✏️</button>
+<button class="delete" onclick="deleteExpense(${i})">🗑</button>
+</div>
+`
+
+list.appendChild(div)
+
+})
+
+}
+
+function editExpense(i){
+
+let newAmount=prompt("Новая сумма",expenses[i].amount)
+
+if(newAmount){
+expenses[i].amount=Number(newAmount)
+save()
+renderHistory()
+drawChart()
+}
+
+}
+
+function deleteExpense(i){
+
+expenses.splice(i,1)
+
+save()
+
+renderHistory()
+
+drawChart()
+
+}
+
+function drawChart(){
+
+let categories={}
+
+expenses.forEach(e=>{
+
+if(!categories[e.category]) categories[e.category]=0
+
+categories[e.category]+=e.amount
+
+})
+
+let ctx=document.getElementById("chart").getContext("2d")
+
+if(chart){
+chart.destroy()
+}
+
+chart=new Chart(ctx,{
+type:"pie",
+data:{
+labels:Object.keys(categories),
+datasets:[{
+data:Object.values(categories)
+}]
+},
+options:{
+plugins:{
+legend:{
+position:"bottom"
+}
+}
+}
+})
+
+}
+
+function renderMonths(){
+
+let stats={}
+
+expenses.forEach(e=>{
+
+let d=new Date(e.date)
+
+let key=d.getFullYear()+"-"+(d.getMonth()+1)
+
+if(!stats[key]) stats[key]=0
+
+stats[key]+=e.amount
+
+})
+
+let div=document.getElementById("monthStats")
+
+div.innerHTML=""
+
+for(let m in stats){
+
+let el=document.createElement("div")
+
+el.className="monthItem"
+
+el.innerHTML=`${m} — <b>${stats[m]} ₽</b>`
+
+div.appendChild(el)
+
+}
+
+}
+
+renderHistory()
+
+</script>
+
+</body>
+</html>
