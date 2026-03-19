@@ -2,417 +2,376 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Мои Финансы</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoinCompass | Firebase Cloud</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
 <style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Inter,system-ui; }
+body{ background:#f5f7fb; color:#222; }
+header{ height:70px; background:white; display:flex; align-items:center; justify-content:center; position:relative; box-shadow:0 3px 20px rgba(0,0,0,0.05); }
+.logo-title{ position:absolute; left:40px; font-size:22px; font-weight:800; color: #222; }
+nav{ display:flex; gap:25px; }
+nav button{ border:none; background:none; font-size:15px; cursor:pointer; padding:8px 16px; border-radius:8px; transition: 0.3s; }
+nav button.active{ background:#4b6cff; color:white; }
+.container{ max-width:1100px; margin:auto; padding:40px; }
+.section{ display:none; }
+.section.active{ display:block; }
+h2{ margin-bottom:20px; }
+.form{ background:white; padding:25px; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,0.05); }
+.form input, .form select{ width:100%; padding:13px; margin-bottom:18px; border:1px solid #ddd; border-radius:8px; font-size:14px; }
+.main-btn{ width:100%; padding:14px; border:none; background:#4b6cff; color:white; border-radius:8px; cursor:pointer; font-size:15px; font-weight: 600; }
+.cancel-btn{ width:100%; margin-top:10px; padding:10px; border:none; background:#eee; color:#666; border-radius:8px; cursor:pointer; display:none; }
+table{ width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.04); }
+th,td{ padding:14px; border-bottom:1px solid #eee; }
+th{ background:#fafafa; text-align:left; color: #777; font-size: 13px; }
+.edit-btn{ background:#f39c12; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-right: 5px; }
+.delete-btn{ background:#ff4b4b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; }
+.stats{ display:flex; gap:20px; align-items:flex-start; }
+.left-chart, .right-chart{ display:flex; flex-direction:column; }
+.left-chart{ flex:1; }
+.right-chart{ flex:1; min-width:300px; max-height:350px; background:white; border-radius:14px; padding:15px; box-shadow:0 10px 25px rgba(0,0,0,0.05); }
+#barChart{ height:250px !important; }
+.chart-wrap{ background:white; border-radius:14px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.05); margin-top:20px; display:flex; justify-content:center; }
+.card{ background:white; padding:20px; border-radius:14px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.05); margin-bottom:15px; }
+.card-title{ color:#777; font-size:14px; }
+.card-value{ font-size:28px; font-weight:700; margin-top:8px; }
+.tools{ margin-top:20px; display:flex; gap:10px; }
+.tools button{ padding:10px 15px; border:none; border-radius:6px; background:#eee; cursor:pointer; }
+.notify{ position:fixed; bottom:20px; left:50%; transform:translate(-50%,20px); background:#222; color:white; padding:14px 22px; border-radius:10px; opacity:0; transition:0.4s; pointer-events: none; z-index: 1000; }
+.notify.show{ opacity:1; transform:translate(-50%,0); }
 
-*{
-box-sizing:border-box;
-}
-
-body{
-margin:0;
-font-family:system-ui;
-background:#f5f6fa;
-font-size:18px;
-}
-
-header{
-background:linear-gradient(90deg,#6366f1,#8b5cf6);
-color:white;
-padding:22px;
-text-align:center;
-font-size:28px;
-font-weight:bold;
-}
-
-nav{
-display:flex;
-justify-content:space-around;
-background:white;
-padding:14px;
-box-shadow:0 3px 8px rgba(0,0,0,0.08);
-position:sticky;
-top:0;
-}
-
-nav button{
-background:none;
-border:none;
-font-size:18px;
-cursor:pointer;
-padding:10px;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:25px;
-border-radius:16px;
-margin-bottom:20px;
-box-shadow:0 4px 15px rgba(0,0,0,0.05);
-}
-
-h2{
-margin-top:0;
-}
-
-input{
-width:100%;
-padding:14px;
-margin-top:10px;
-margin-bottom:15px;
-font-size:17px;
-border-radius:10px;
-border:1px solid #ddd;
-}
-
-.mainBtn{
-width:100%;
-padding:15px;
-background:#6366f1;
-color:white;
-border:none;
-border-radius:10px;
-font-size:18px;
-cursor:pointer;
-}
-
-.history-item{
-display:flex;
-justify-content:space-between;
-padding:12px 0;
-border-bottom:1px solid #eee;
-align-items:center;
-}
-
-.actions button{
-border:none;
-padding:6px 10px;
-margin-left:6px;
-border-radius:6px;
-cursor:pointer;
-}
-
-.edit{
-background:#f59e0b;
-color:white;
-}
-
-.delete{
-background:#ef4444;
-color:white;
-}
-
-canvas{
-max-width:360px;
-margin:auto;
-display:block;
-}
-
-.hidden{
-display:none;
-}
-
-#toast{
-position:fixed;
-bottom:25px;
-left:50%;
-transform:translateX(-50%);
-background:#22c55e;
-color:white;
-padding:14px 24px;
-border-radius:10px;
-font-size:18px;
-opacity:0;
-transition:0.3s;
-}
-
-.monthItem{
-padding:10px 0;
-border-bottom:1px solid #eee;
-}
-
+/* Личный кабинет */
+#logoutBtn{ position: fixed; bottom:20px; left:20px; padding:8px 12px; background:#ff4b4b; color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; display:none; }
+#loginSection{ max-width:400px; margin:100px auto; display:none; }
+#loginSection input{ width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd; font-size:14px; }
+#loginSection button{ width:100%; padding:12px; border:none; border-radius:8px; background:#4b6cff; color:white; font-size:15px; cursor:pointer; margin-bottom:10px; }
+#periodSelect{ margin-bottom:10px; }
 </style>
 </head>
-
 <body>
 
-<header>💰 Мои Финансы</header>
+<header>
+    <div class="logo-title">CoinCompass</div>
+    <nav>
+        <button class="tab active" onclick="tab('add',this)">Добавить</button>
+        <button class="tab" onclick="tab('history',this)">История</button>
+        <button class="tab" onclick="tab('stats',this)">Статистика</button>
+        <button class="tab" onclick="tab('months',this)">По месяцам</button>
+    </nav>
+</header>
 
-<nav>
-<button onclick="openTab('add')">➕ Добавить</button>
-<button onclick="openTab('history')">📜 История</button>
-<button onclick="openTab('stats')">📊 Статистика</button>
-<button onclick="openTab('months')">📅 Месяцы</button>
-</nav>
-
-<div class="container">
-
-<!-- ДОБАВИТЬ -->
-
-<div id="add">
-
-<div class="card">
-
-<h2>Добавить расход</h2>
-
-<input id="amount" type="number" placeholder="Сумма">
-
-<input id="category" placeholder="Категория (еда, транспорт)">
-
-<button class="mainBtn" onclick="addExpense()">Добавить расход</button>
-
+<div id="loginSection">
+    <h2>Вход / Регистрация</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Пароль">
+    <button onclick="login()">Войти</button>
+    <button onclick="register()">Зарегистрироваться</button>
 </div>
 
+<button id="logoutBtn" onclick="logout()">Выйти</button>
+
+<div class="container" id="mainApp">
+    <div id="add" class="section active">
+        <h2 id="formTitle">Добавить расход</h2>
+        <div class="form">
+            <input id="amount" type="number" placeholder="Сумма">
+            <select id="category">
+                <option>Еда</option>
+                <option>Транспорт</option>
+                <option>Развлечения</option>
+                <option>Жилье</option>
+                <option>Покупки</option>
+                <option>Прочее</option>
+            </select>
+            <input id="desc" placeholder="Описание">
+            <button id="submitBtn" class="main-btn" onclick="saveExpense()">Сохранить расход</button>
+            <button id="cancelBtn" class="cancel-btn" onclick="resetForm()">Отмена редактирования</button>
+        </div>
+    </div>
+
+    <div id="history" class="section">
+        <h2>История расходов</h2>
+        <table>
+            <thead>
+                <tr><th>Дата</th><th>Категория</th><th>Сумма</th><th>Описание</th><th>Действие</th></tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+        <div class="tools">
+            <button onclick="exportData()">Скачать JSON</button>
+        </div>
+    </div>
+
+    <div id="stats" class="section">
+        <h2>Статистика</h2>
+        <div class="stats">
+            <div class="left-chart">
+                <div class="card">
+                    <div class="card-title">Всего расходов</div>
+                    <div id="total" class="card-value">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Операций</div>
+                    <div id="count" class="card-value">0</div>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="chart"></canvas>
+                </div>
+            </div>
+            <div class="right-chart">
+                <select id="periodSelect" onchange="renderBarChart()">
+                    <option value="day">День</option>
+                    <option value="week">Неделя</option>
+                    <option value="month">Месяц</option>
+                </select>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="months" class="section">
+        <h2>Расходы по месяцам</h2>
+        <table>
+            <thead><tr><th>Месяц</th><th>Сумма</th></tr></thead>
+            <tbody id="monthBody"></tbody>
+        </table>
+    </div>
 </div>
 
-<!-- ИСТОРИЯ -->
-
-<div id="history" class="hidden">
-
-<div class="card">
-
-<h2>История расходов</h2>
-
-<div id="historyList"></div>
-
-</div>
-
-</div>
-
-<!-- СТАТИСТИКА -->
-
-<div id="stats" class="hidden">
-
-<div class="card">
-
-<h2>Диаграмма расходов</h2>
-
-<canvas id="chart"></canvas>
-
-</div>
-
-</div>
-
-<!-- МЕСЯЦЫ -->
-
-<div id="months" class="hidden">
-
-<div class="card">
-
-<h2>Расходы по месяцам</h2>
-
-<div id="monthStats"></div>
-
-</div>
-
-</div>
-
-</div>
-
-<div id="toast"></div>
+<div id="notify" class="notify">Готово</div>
 
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDUKNKvSuoPYrCe7d6Xnc8rIdfq7ZMVf2k",
+  authDomain: "coincompass-hack.firebaseapp.com",
+  projectId: "coincompass-hack",
+  storageBucket: "coincompass-hack.firebasestorage.app",
+  messagingSenderId: "972639367478",
+  appId: "1:972639367478:web:49ce98b93c2cabd3250397",
+  databaseURL: "https://coincompass-hack-default-rtdb.europe-west1.firebasedatabase.app"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
 
-let expenses = JSON.parse(localStorage.getItem("expenses")) || []
-let chart = null
+let expenses = [];
+let chart = null;
+let barChart = null;
+let editingId = null;
+let currentUser = null;
 
-function save(){
-localStorage.setItem("expenses",JSON.stringify(expenses))
+function notify(text){
+    let n=document.getElementById("notify")
+    n.innerText=text
+    n.classList.add("show")
+    setTimeout(()=>{n.classList.remove("show")},2000)
 }
 
-function showToast(text){
-
-let t=document.getElementById("toast")
-
-t.innerText=text
-t.style.opacity=1
-
-setTimeout(()=>{
-t.style.opacity=0
-},2500)
-
+function tab(id,btn){
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"))
+    document.getElementById(id).classList.add("active")
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"))
+    btn.classList.add("active")
+    render();
 }
 
-function openTab(tab){
-
-document.querySelectorAll(".container > div")
-.forEach(e=>e.classList.add("hidden"))
-
-document.getElementById(tab).classList.remove("hidden")
-
-if(tab==="history") renderHistory()
-if(tab==="stats") drawChart()
-if(tab==="months") renderMonths()
-
+// Авторизация
+function showApp(user){
+    currentUser = user;
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    document.getElementById("logoutBtn").style.display = "inline-block";
+    loadExpenses();
 }
 
-function addExpense(){
-
-let amount=Number(document.getElementById("amount").value)
-let category=document.getElementById("category").value.toLowerCase().trim()
-
-if(!amount || !category){
-showToast("Введите данные")
-return
+function login(){
+    const email = document.getElementById("loginEmail").value;
+    const pass = document.getElementById("loginPassword").value;
+    auth.signInWithEmailAndPassword(email, pass)
+    .then(res => showApp(res.user))
+    .catch(err => notify(err.message));
 }
 
-let date=new Date()
+function register(){
+    const email = document.getElementById("loginEmail").value;
+    const pass = document.getElementById("loginPassword").value;
+    auth.createUserWithEmailAndPassword(email, pass)
+    .then(res => showApp(res.user))
+    .catch(err => notify(err.message));
+}
 
-expenses.push({
-amount,
-category,
-date:date.toISOString()
-})
+function logout(){
+    auth.signOut().then(() => {
+        currentUser = null;
+        document.getElementById("loginSection").style.display = "block";
+        document.getElementById("mainApp").style.display = "none";
+        document.getElementById("logoutBtn").style.display = "none";
+    });
+}
 
-save()
+function loadExpenses(){
+    if(!currentUser) return;
+    db.ref("users/" + currentUser.uid + "/expenses").on("value", (snapshot) => {
+        const data = snapshot.val();
+        expenses = data ? Object.keys(data).map(key => ({...data[key], firebaseId: key})) : [];
+        render();
+    });
+}
 
-document.getElementById("amount").value=""
-document.getElementById("category").value=""
+function saveExpense(){
+    if(!currentUser) { notify("Необходимо войти"); return; }
+    let amount=document.getElementById("amount")
+    let category=document.getElementById("category")
+    let desc=document.getElementById("desc")
+    if(!amount.value) return;
+    const expenseData = {
+        amount: Number(amount.value),
+        category: category.value,
+        desc: desc.value || "-",
+        date: editingId ? expenses.find(e => e.firebaseId === editingId).date : new Date().toISOString()
+    };
+    if(editingId) {
+        db.ref("users/" + currentUser.uid + "/expenses/" + editingId).update(expenseData);
+        notify("Обновлено");
+        resetForm();
+    } else {
+        db.ref("users/" + currentUser.uid + "/expenses").push(expenseData);
+        notify("Сохранено");
+    }
+    amount.value=""
+    desc.value=""
+}
 
-showToast("Расход добавлен")
+function editEntry(id){
+    const item = expenses.find(e => e.firebaseId === id);
+    if(!item) return;
+    editingId = id;
+    document.getElementById("amount").value = item.amount;
+    document.getElementById("category").value = item.category;
+    document.getElementById("desc").value = item.desc;
+    document.getElementById("formTitle").innerText = "Редактировать расход";
+    document.getElementById("submitBtn").innerText = "Обновить запись";
+    document.getElementById("cancelBtn").style.display = "block";
+    tab('add', document.querySelector('.tab[onclick*="add"]'));
+}
 
-renderHistory()
+function resetForm() {
+    editingId = null;
+    document.getElementById("amount").value = "";
+    document.getElementById("desc").value = "";
+    document.getElementById("formTitle").innerText = "Добавить расход";
+    document.getElementById("submitBtn").innerText = "Сохранить расход";
+    document.getElementById("cancelBtn").style.display = "none";
+}
 
+function del(firebaseId){
+    if(!currentUser) return;
+    if(confirm("Удалить запись?")) {
+        db.ref("users/" + currentUser.uid + "/expenses/" + firebaseId).remove();
+        notify("Удалено");
+    }
+}
+
+function render(){
+    renderHistory();
+    renderStats();
+    renderMonths();
+    renderBarChart();
 }
 
 function renderHistory(){
-
-let list=document.getElementById("historyList")
-
-list.innerHTML=""
-
-expenses.forEach((e,i)=>{
-
-let div=document.createElement("div")
-
-div.className="history-item"
-
-div.innerHTML=`
-<div>
-<b>${e.category}</b><br>
-${e.amount} ₽
-</div>
-
-<div class="actions">
-<button class="edit" onclick="editExpense(${i})">✏️</button>
-<button class="delete" onclick="deleteExpense(${i})">🗑</button>
-</div>
-`
-
-list.appendChild(div)
-
-})
-
+    let html=""
+    expenses.slice().reverse().forEach(e=>{
+        let date=new Date(e.date).toLocaleDateString()
+        html += `
+        <tr>
+            <td>${date}</td>
+            <td>${e.category}</td>
+            <td>${e.amount} ₽</td>
+            <td>${e.desc}</td>
+            <td>
+                <button class="edit-btn" onclick="editEntry('${e.firebaseId}')">Изменить</button>
+                <button class="delete-btn" onclick="del('${e.firebaseId}')">Удалить</button>
+            </td>
+        </tr>`;
+    })
+    document.getElementById("historyBody").innerHTML = html;
 }
 
-function editExpense(i){
+function renderStats(){
+    let total=0;
+    let cats={};
+    expenses.forEach(e=>{
+        total += e.amount;
+        cats[e.category] = (cats[e.category] || 0) + e.amount;
+    });
+    document.getElementById("total").innerText = total + " ₽";
+    document.getElementById("count").innerText = expenses.length;
 
-let newAmount=prompt("Новая сумма",expenses[i].amount)
-
-if(newAmount){
-expenses[i].amount=Number(newAmount)
-save()
-renderHistory()
-drawChart()
+    let ctx = document.getElementById("chart");
+    if(chart) chart.destroy();
+    if(expenses.length > 0) {
+        chart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: Object.keys(cats),
+                datasets: [{ 
+                    data: Object.values(cats),
+                    backgroundColor: ['#4b6cff', '#ff4b4b', '#ffb84b', '#2ecc71', '#9b59b6', '#34495e']
+                }]
+            },
+            options: { 
+                maintainAspectRatio: false,
+                plugins: { legend: { position: "bottom" } } 
+            }
+        });
+    }
 }
 
-}
+// --- Новый график расходов по периоду ---
+function renderBarChart(){
+    if(!currentUser) return;
+    const period = document.getElementById("periodSelect").value;
+    let labels = [];
+    let data = [];
+    let now = new Date();
 
-function deleteExpense(i){
+    if(period === "day"){
+        labels = ["0","4","8","12","16","20","24"];
+        data = Array(7).fill(0);
+        expenses.forEach(e=>{
+            let date = new Date(e.date);
+            if(date.toDateString() === now.toDateString()){
+                let hour = date.getHours();
+                let index = Math.floor(hour/4);
+                data[index] += e.amount;
+            }
+        });
+    } else if(period === "week"){
+        labels = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+        data = Array(7).fill(0);
+        expenses.forEach(e=>{
+            let date = new Date(e.date);
+            let day = date.getDay(); // 0 воскресенье
+            let index = (day+6)%7; // чтобы Пн=0
+            data[index] += e.amount;
+        });
+    } else if(period === "month"){
+        let days = new Date(now.getFullYear(), now.getMonth()+1,0).getDate();
+        labels = Array.from({length:days}, (_,i)=>i+1);
+        data = Array(days).fill(0);
+        expenses.forEach(e=>{
+            let date = new Date(e.date);
+            if(date.getMonth() === now.getMonth() && date.getFullYear()===now.getFullYear()){
+                data[date.getDate()-1] += e.amount;
+            }
+        });
+    }
 
-expenses.splice(i,1)
-
-save()
-
-renderHistory()
-
-drawChart()
-
-}
-
-function drawChart(){
-
-let categories={}
-
-expenses.forEach(e=>{
-
-if(!categories[e.category]) categories[e.category]=0
-
-categories[e.category]+=e.amount
-
-})
-
-let ctx=document.getElementById("chart").getContext("2d")
-
-if(chart){
-chart.destroy()
-}
-
-chart=new Chart(ctx,{
-type:"pie",
-data:{
-labels:Object.keys(categories),
-datasets:[{
-data:Object.values(categories)
-}]
-},
-options:{
-plugins:{
-legend:{
-position:"bottom"
-}
-}
-}
-})
-
-}
-
-function renderMonths(){
-
-let stats={}
-
-expenses.forEach(e=>{
-
-let d=new Date(e.date)
-
-let key=d.getFullYear()+"-"+(d.getMonth()+1)
-
-if(!stats[key]) stats[key]=0
-
-stats[key]+=e.amount
-
-})
-
-let div=document.getElementById("monthStats")
-
-div.innerHTML=""
-
-for(let m in stats){
-
-let el=document.createElement("div")
-
-el.className="monthItem"
-
-el.innerHTML=`${m} — <b>${stats[m]} ₽</b>`
-
-div.appendChild(el)
-
-}
-
-}
-
-renderHistory()
-
-</script>
-
-</body>
-</html>
+    let ctx = document.getElementById("barChart");
+    if(barChart)
