@@ -24,31 +24,32 @@ nav button.active{ background:#4b6cff; color:white; }
 h2{ margin-bottom:20px; }
 .form{ background:white; padding:25px; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,0.05); }
 .form input, .form select{ width:100%; padding:13px; margin-bottom:18px; border:1px solid #ddd; border-radius:8px; font-size:14px; }
-.main-btn{ width:100%; padding:14px; border:none; background:#4b6cff; color:white; border-radius:8px; cursor:pointer; font-size:15px; font-weight:600; }
+.main-btn{ width:100%; padding:14px; border:none; background:#4b6cff; color:white; border-radius:8px; cursor:pointer; font-size:15px; font-weight: 600; }
 .cancel-btn{ width:100%; margin-top:10px; padding:10px; border:none; background:#eee; color:#666; border-radius:8px; cursor:pointer; display:none; }
 table{ width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.04); }
 th,td{ padding:14px; border-bottom:1px solid #eee; }
-th{ background:#fafafa; text-align:left; color:#777; font-size:13px; }
-.edit-btn{ background:#f39c12; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-right:5px; }
+th{ background:#fafafa; text-align:left; color: #777; font-size: 13px; }
+.edit-btn{ background:#f39c12; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-right: 5px; }
 .delete-btn{ background:#ff4b4b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; }
 .stats{ display:flex; gap:20px; align-items:flex-start; }
 .left-chart, .right-chart{ display:flex; flex-direction:column; }
 .left-chart{ flex:1; }
-.right-chart{ flex:1; min-width:300px; max-height:350px; background:white; border-radius:14px; padding:15px; box-shadow:0 10px 25px rgba(0,0,0,0.05); }
-#barChart{ height:250px !important; }
-.chart-wrap{ background:white; border-radius:14px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.05); margin-top:20px; display:flex; justify-content:center; }
+.right-chart{ flex:1; min-width:300px; background:white; border-radius:14px; padding:15px; box-shadow:0 10px 25px rgba(0,0,0,0.05); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:100%; }
+.right-chart .card{ margin-bottom:10px; width:100%; text-align:center; }
+#barChart{ width:100% !important; height:300px !important; }
+.chart-wrap{ background:white; border-radius:14px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.05); margin-top:20px; display:flex; justify-content:center; height:300px; }
 .card{ background:white; padding:20px; border-radius:14px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.05); margin-bottom:15px; }
 .card-title{ color:#777; font-size:14px; }
 .card-value{ font-size:28px; font-weight:700; margin-top:8px; }
 .tools{ margin-top:20px; display:flex; gap:10px; }
 .tools button{ padding:10px 15px; border:none; border-radius:6px; background:#eee; cursor:pointer; }
-.notify{ position:fixed; bottom:20px; left:50%; transform:translate(-50%,20px); background:#222; color:white; padding:14px 22px; border-radius:10px; opacity:0; transition:0.4s; pointer-events:none; z-index:1000; }
+.notify{ position:fixed; bottom:20px; left:50%; transform:translate(-50%,20px); background:#222; color:white; padding:14px 22px; border-radius:10px; opacity:0; transition:0.4s; pointer-events: none; z-index: 1000; }
 .notify.show{ opacity:1; transform:translate(-50%,0); }
 #logoutBtn{ position: fixed; bottom:20px; left:20px; padding:8px 12px; background:#ff4b4b; color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; display:none; }
 #loginSection{ max-width:400px; margin:100px auto; display:none; }
 #loginSection input{ width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd; font-size:14px; }
 #loginSection button{ width:100%; padding:12px; border:none; border-radius:8px; background:#4b6cff; color:white; font-size:15px; cursor:pointer; margin-bottom:10px; }
-#periodSelect{ margin-bottom:10px; }
+#periodSelect{ margin-bottom:10px; width:100%; padding:8px; border-radius:6px; border:1px solid #ddd; font-size:14px; }
 </style>
 </head>
 <body>
@@ -113,15 +114,15 @@ th{ background:#fafafa; text-align:left; color:#777; font-size:13px; }
                     <div class="card-title">Всего расходов</div>
                     <div id="total" class="card-value">0</div>
                 </div>
-                <div class="card">
-                    <div class="card-title">Операций</div>
-                    <div id="count" class="card-value">0</div>
-                </div>
                 <div class="chart-wrap">
                     <canvas id="chart"></canvas>
                 </div>
             </div>
             <div class="right-chart">
+                <div class="card">
+                    <div class="card-title">Операций</div>
+                    <div id="count" class="card-value">0</div>
+                </div>
                 <select id="periodSelect" onchange="renderBarChart()">
                     <option value="day">День</option>
                     <option value="week">Неделя</option>
@@ -144,140 +145,47 @@ th{ background:#fafafa; text-align:left; color:#777; font-size:13px; }
 <div id="notify" class="notify">Готово</div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDUKNKvSuoPYrCe7d6Xnc8rIdfq7ZMVf2k",
-  authDomain: "coincompass-hack.firebaseapp.com",
-  projectId: "coincompass-hack",
-  storageBucket: "coincompass-hack.firebasestorage.app",
-  messagingSenderId: "972639367478",
-  appId: "1:972639367478:web:49ce98b93c2cabd3250397",
-  databaseURL: "https://coincompass-hack-default-rtdb.europe-west1.firebasedatabase.app"
-};
+// Firebase init
+const firebaseConfig = { /* ваши ключи */ };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
+const db=firebase.database(), auth=firebase.auth();
+let expenses=[], chart=null, barChart=null, editingId=null, currentUser=null;
 
-let expenses = [];
-let chart = null;
-let barChart = null;
-let editingId = null;
-let currentUser = null;
+// уведомления
+function notify(text){ let n=document.getElementById("notify"); n.innerText=text; n.classList.add("show"); setTimeout(()=>n.classList.remove("show"),2000); }
+function tab(id,btn){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active")); btn.classList.add("active"); render(); }
 
-function notify(text){
-    let n=document.getElementById("notify")
-    n.innerText=text
-    n.classList.add("show")
-    setTimeout(()=>{n.classList.remove("show")},2000)
-}
+// авторизация
+function showApp(user){ currentUser=user; document.getElementById("loginSection").style.display="none"; document.getElementById("mainApp").style.display="block"; document.getElementById("logoutBtn").style.display="inline-block"; loadExpenses(); }
+function login(){ const email=document.getElementById("loginEmail").value; const pass=document.getElementById("loginPassword").value; auth.signInWithEmailAndPassword(email,pass).then(res=>showApp(res.user)).catch(err=>notify(err.message)); }
+function register(){ const email=document.getElementById("loginEmail").value; const pass=document.getElementById("loginPassword").value; auth.createUserWithEmailAndPassword(email,pass).then(res=>showApp(res.user)).catch(err=>notify(err.message)); }
+function logout(){ auth.signOut().then(()=>{ currentUser=null; document.getElementById("loginSection").style.display="block"; document.getElementById("mainApp").style.display="none"; document.getElementById("logoutBtn").style.display="none"; }); }
+function loadExpenses(){ if(!currentUser)return; db.ref("users/"+currentUser.uid+"/expenses").on("value",snap=>{ const data=snap.val(); expenses=data?Object.keys(data).map(k=>({...data[k],firebaseId:k})):[]; render();}); }
+function saveExpense(){ if(!currentUser){notify("Необходимо войти"); return;} let amount=document.getElementById("amount"),category=document.getElementById("category"),desc=document.getElementById("desc"); if(!amount.value) return; const e={amount:Number(amount.value),category:category.value,desc:desc.value||"-",date:editingId?expenses.find(e=>e.firebaseId===editingId).date:new Date().toISOString()}; if(editingId){db.ref("users/"+currentUser.uid+"/expenses/"+editingId).update(e);notify("Обновлено");resetForm();}else{db.ref("users/"+currentUser.uid+"/expenses").push(e);notify("Сохранено");} amount.value=""; desc.value=""; }
+function editEntry(id){ const item=expenses.find(e=>e.firebaseId===id); if(!item)return; editingId=id; document.getElementById("amount").value=item.amount; document.getElementById("category").value=item.category; document.getElementById("desc").value=item.desc; document.getElementById("formTitle").innerText="Редактировать расход"; document.getElementById("submitBtn").innerText="Обновить запись"; document.getElementById("cancelBtn").style.display="block"; tab('add',document.querySelector('.tab[onclick*="add"]')); }
+function resetForm(){ editingId=null; document.getElementById("amount").value=""; document.getElementById("desc").value=""; document.getElementById("formTitle").innerText="Добавить расход"; document.getElementById("submitBtn").innerText="Сохранить расход"; document.getElementById("cancelBtn").style.display="none"; }
+function del(firebaseId){ if(!currentUser)return; if(confirm("Удалить запись?")){ db.ref("users/"+currentUser.uid+"/expenses/"+firebaseId).remove(); notify("Удалено"); } }
 
-function tab(id,btn){
-    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"))
-    document.getElementById(id).classList.add("active")
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"))
-    btn.classList.add("active")
-    render();
-}
+function render(){ renderHistory(); renderStats(); renderMonths(); renderBarChart(); }
+function renderHistory(){ let html=""; expenses.slice().reverse().forEach(e=>{ let date=new Date(e.date).toLocaleDateString(); html+=`<tr><td>${date}</td><td>${e.category}</td><td>${e.amount} ₽</td><td>${e.desc}</td><td><button class="edit-btn" onclick="editEntry('${e.firebaseId}')">Изменить</button><button class="delete-btn" onclick="del('${e.firebaseId}')">Удалить</button></td></tr>`;}); document.getElementById("historyBody").innerHTML=html; }
+function renderStats(){ let total=0,cats={}; expenses.forEach(e=>{ total+=e.amount; cats[e.category]=(cats[e.category]||0)+e.amount; }); document.getElementById("total").innerText=total+" ₽"; document.getElementById("count").innerText=expenses.length; let ctx=document.getElementById("chart"); if(chart)chart.destroy(); if(expenses.length>0){ chart=new Chart(ctx,{ type:"doughnut", data:{ labels:Object.keys(cats), datasets:[{data:Object.values(cats),backgroundColor:['#4b6cff','#ff4b4b','#ffb84b','#2ecc71','#9b59b6','#34495e']}]}, options:{ maintainAspectRatio:false, plugins:{legend:{position:"bottom"}}} }); } }
+function renderMonths(){ let months={}; expenses.forEach(e=>{ let m=new Date(e.date).toLocaleString("ru",{month:"long",year:"numeric"}); months[m]=(months[m]||0)+e.amount;}); let html=""; for(let m in months){ html+=`<tr><td>${m}</td><td>${months[m]} ₽</td></tr>`;} document.getElementById("monthBody").innerHTML=html; }
+function exportData(){ if(!currentUser)return; const data=JSON.stringify(expenses); const blob=new Blob([data],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="coincompass_backup.json"; a.click(); }
 
-// Авторизация
-function showApp(user){
-    currentUser = user;
-    document.getElementById("loginSection").style.display = "none";
-    document.getElementById("mainApp").style.display = "block";
-    document.getElementById("logoutBtn").style.display = "inline-block";
-    loadExpenses();
-}
-
-function login(){
-    const email = document.getElementById("loginEmail").value;
-    const pass = document.getElementById("loginPassword").value;
-    auth.signInWithEmailAndPassword(email, pass)
-    .then(res => showApp(res.user))
-    .catch(err => notify(err.message));
-}
-
-function register(){
-    const email = document.getElementById("loginEmail").value;
-    const pass = document.getElementById("loginPassword").value;
-    auth.createUserWithEmailAndPassword(email, pass)
-    .then(res => showApp(res.user))
-    .catch(err => notify(err.message));
-}
-
-function logout(){
-    auth.signOut().then(() => {
-        currentUser = null;
-        document.getElementById("loginSection").style.display = "block";
-        document.getElementById("mainApp").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "none";
-    });
-}
-
-// Загрузка данных конкретного пользователя
-function loadExpenses(){
-    if(!currentUser) return;
-    db.ref("users/" + currentUser.uid + "/expenses").on("value", (snapshot) => {
-        const data = snapshot.val();
-        expenses = data ? Object.keys(data).map(key => ({...data[key], firebaseId: key})) : [];
-        render();
-    });
-}
-
-// Остальной код работы с расходами: save, edit, del, render, renderHistory, renderStats, renderMonths ...
-
-// --- Новый график расходов по периоду ---
+// --- Гистограмма справа ---
 function renderBarChart(){
     if(!currentUser) return;
-    const period = document.getElementById("periodSelect").value;
-    let labels = [], data = [];
-    const now = new Date();
-
-    if(period==="day"){
-        labels = ["0","4","8","12","16","20","24"];
-        data = Array(7).fill(0);
-        expenses.forEach(e=>{
-            const date = new Date(e.date);
-            if(date.toDateString()===now.toDateString()){
-                let index = Math.floor(date.getHours()/4);
-                data[index]+=e.amount;
-            }
-        });
-    } else if(period==="week"){
-        labels = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
-        data = Array(7).fill(0);
-        expenses.forEach(e=>{
-            let d = new Date(e.date);
-            let index = (d.getDay()+6)%7;
-            data[index]+=e.amount;
-        });
-    } else if(period==="month"){
-        let days = new Date(now.getFullYear(), now.getMonth()+1,0).getDate();
-        labels = Array.from({length:days},(_,i)=>i+1);
-        data = Array(days).fill(0);
-        expenses.forEach(e=>{
-            let d = new Date(e.date);
-            if(d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()){
-                data[d.getDate()-1]+=e.amount;
-            }
-        });
-    }
-
-    const ctx = document.getElementById("barChart");
-    if(barChart) barChart.destroy();
-    barChart = new Chart(ctx,{
-        type:"bar",
-        data:{labels:labels,datasets:[{label:"Расходы",data:data,backgroundColor:"#4b6cff"}]},
-        options:{maintainAspectRatio:false,plugins:{legend:{display:false}}}
-    });
+    const period=document.getElementById("periodSelect").value;
+    let labels=[], data=[];
+    const now=new Date();
+    if(period==="day"){ labels=["0","4","8","12","16","20","24"]; data=Array(7).fill(0); expenses.forEach(e=>{ let d=new Date(e.date); if(d.toDateString()===now.toDateString()){ data[Math.floor(d.getHours()/4)]+=e.amount; } }); }
+    else if(period==="week"){ labels=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"]; data=Array(7).fill(0); expenses.forEach(e=>{ let d=new Date(e.date); data[(d.getDay()+6)%7]+=e.amount; }); }
+    else if(period==="month"){ const days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(); labels=Array.from({length:days},(_,i)=>i+1); data=Array(days).fill(0); expenses.forEach(e=>{ let d=new Date(e.date); if(d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()){ data[d.getDate()-1]+=e.amount; }}); }
+    const ctx=document.getElementById("barChart"); if(barChart)barChart.destroy();
+    barChart=new Chart(ctx,{ type:"bar", data:{ labels:labels, datasets:[{label:"Расходы",data:data,backgroundColor:"#4b6cff"}]}, options:{ maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} } });
 }
 
-auth.onAuthStateChanged(user => {
-    if(user) showApp(user);
-    else {
-        document.getElementById("loginSection").style.display = "block";
-        document.getElementById("mainApp").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "none";
-    }
-});
+auth.onAuthStateChanged(user=>{if(user)showApp(user);else{document.getElementById("loginSection").style.display="block";document.getElementById("mainApp").style.display="none";document.getElementById("logoutBtn").style.display="none";}});
 </script>
 </body>
 </html>
